@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"go_demo_post/myrpc/demo_rpc_http"
+	"go_demo_post/my_gc"
 	"go_demo_post/parse_text"
 	"go_demo_post/parse_text/rule"
 	"log"
@@ -21,7 +21,14 @@ func main() {
 
 	//demo1rpc.DemoRpc1()
 	//demo_rpc_json.DemoRpcJson()
-	demo_rpc_http.DemoRpcHttp()
+	//demo_rpc_http.DemoRpcHttp()
+
+	//my_bucket_v1.DebugMyBucketV1()
+
+	//my_parser.DemoMyParser()
+	//my_middleware.DemoMyMiddleware()
+
+	my_gc.DemoGc()
 	//demokuaishou()
 	return
 

@@ -15,7 +15,7 @@ func (p *HelloService) Hello(request string, reply *string) error {
 }
 
 func (p *HelloService) Hello2(request map[string]string, reply *map[string]string) error {
-	log.Println("request = ", request)
+	//log.Println("request = ", request)
 	args := make(map[string]string)
 	args["version"] = "8.2.0"
 	args["user_id"] = "200"
@@ -72,29 +72,41 @@ func clientGo() {
 	}
 
 	//var reply string
+	var done = make(chan *rpc.Call, 2) //限流
+
+	go func() {
+		for {
+			select {
+			case call := <-done:
+				log.Println("call.err", call.Error)
+				//log.Println("call.reply", call.Reply)
+			}
+			break
+		}
+	}()
 
 	for {
+		log.Println(len(done), cap(done))
 
 		go func() {
 			var reply map[string]string
-			var done chan *rpc.Call
-			_ = done
 			args := make(map[string]string)
 			args["version"] = "8.1.0"
 			args["user_id"] = "100"
-			call := client.Go("HelloService.Hello2", args, &reply, nil)
+			//call := client.Go("HelloService.Hello2", args, &reply, done)
+			client.Go("HelloService.Hello2", args, &reply, done)
 
-			calls := <-call.Done
-			err := calls.Error
-
-			//err = client.Call("HelloService.Hello2", args, &reply)
-			if err != nil {
-				log.Println("Client ERROR ", err)
-			}
-			log.Println("reply = ", reply)
-			log.Println(*calls)
+			//calls := <-call.Done
+			//err := calls.Error
+			//
+			////err = client.Call("HelloService.Hello2", args, &reply)
+			//if err != nil {
+			//	log.Println("Client ERROR ", err)
+			//}
+			//log.Println("reply = ", reply)
+			//log.Println(*calls)
 		}()
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(time.Millisecond * 1000)
 	}
 }
 
