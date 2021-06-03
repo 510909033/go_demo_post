@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -83,9 +84,14 @@ func demoRegx(title string) string {
 		shortTitle = strings.TrimSpace(shortTitle)
 
 		for _, rule := range ruleList {
-			for _, fuhao := range []string{"#", "@"} {
+			for _, fuhao := range []string{"@", "#"} {
+				var ruleStr string
+				if fuhao == "@" {
+					ruleStr = fmt.Sprintf(`%s.*`, fuhao)
+				} else {
+					ruleStr = fmt.Sprintf(`%s.*%s.*`, fuhao, rule)
+				}
 
-				ruleStr := fmt.Sprintf(`%s.*%s.*`, fuhao, rule)
 				re := regexp.MustCompile(ruleStr)
 				if re.Match([]byte(shortTitle)) {
 					//log.Println("标题命中 ", shortTitle, "|", ruleStr)
@@ -101,7 +107,7 @@ func demoRegx(title string) string {
 			newTitleList = append(newTitleList, shortTitle)
 		}
 	}
-	//log.Println(strings.Join(newTitleList, " "))
+	log.Println(strings.Join(newTitleList, " "))
 	return strings.Join(newTitleList, " ")
 }
 
@@ -138,5 +144,9 @@ func demokuaishou() {
 	fmt.Println(string(b))
 	//fmt.Println("package app_index\n var IosConfig = []byte(`" + string(b) + "`)")
 	//ioutil.WriteFile("C:/Users/Administrator/Desktop/8.33.0/8.46/ios-app-search/ios_inner_search_data.go", []byte("package app_index\n var IosConfig = []byte(`"+string(b)+"`)"), 0755)
+
+}
+
+func aaaaa() {
 
 }

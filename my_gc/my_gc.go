@@ -24,6 +24,7 @@ import (
 // With a plain slice ([]main.t), GC took 312.583µs
 
 func DemoGc() {
+
 	const N = 30e6
 
 	if len(os.Args) != 2 {

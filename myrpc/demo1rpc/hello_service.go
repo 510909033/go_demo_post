@@ -4,32 +4,56 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
-type HelloService struct{}
+type HelloService struct {
+	mu sync.Mutex
+	Pv uint64
+}
 
+func (p *HelloService) monitor() {
+	ticker := time.NewTicker(time.Second * 5)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				log.Println(p.Pv)
+			}
+		}
+	}()
+}
 func (p *HelloService) Hello(request string, reply *string) error {
 	*reply = "hello:" + request
 	return nil
 }
 
+var bigStr = [10000]byte{}
+
 func (p *HelloService) Hello2(request map[string]string, reply *map[string]string) error {
+	p.mu.Lock()
+	atomic.AddUint64(&p.Pv, 1)
+	p.mu.Unlock()
 	//log.Println("request = ", request)
 	args := make(map[string]string)
 	args["version"] = "8.2.0"
 	args["user_id"] = "200"
+	args["big_data"] = string(bigStr[:10000])
 	*reply = args
 	//*reply = "hello:" + request
-	time.Sleep(time.Second * 3) //
+	//time.Sleep(time.Second * 3) //
+	time.Sleep(time.Millisecond * 5)
 	return nil
 }
 
 func server() {
+	helloService := new(HelloService)
+	helloService.monitor()
+	rpc.RegisterName("HelloService", helloService)
 
-	rpc.RegisterName("HelloService", new(HelloService))
-
-	listener, err := net.Listen("tcp", ":1234")
+	listener, err := net.Listen("tcp", "mylocalhost:1234")
 	if err != nil {
 		log.Fatal("ListenTCP error:", err)
 	}
@@ -44,7 +68,7 @@ func server() {
 	}
 }
 
-func client() {
+func clientCall() {
 	client, err := rpc.Dial("tcp", "localhost:1234")
 	if err != nil {
 		log.Fatal("dialing:", err)
@@ -60,8 +84,8 @@ func client() {
 		if err != nil {
 			log.Println("Client ERROR ", err)
 		}
-		log.Println("reply = ", reply)
-		time.Sleep(time.Millisecond * 10)
+		//log.Println("reply = ", reply)
+		//time.Sleep(time.Millisecond * 10)
 	}
 }
 
@@ -81,7 +105,7 @@ func clientGo() {
 				log.Println("call.err", call.Error)
 				//log.Println("call.reply", call.Reply)
 			}
-			break
+			//break
 		}
 	}()
 
@@ -116,8 +140,10 @@ func DemoRpc1() {
 
 	time.Sleep(time.Second * 1)
 
-	go clientGo()
-	//go client()
+	//go clientGo()
+	for i := 0; i < 1000; i++ {
+		go clientCall()
+	}
 	//go client()
 	//go client()
 

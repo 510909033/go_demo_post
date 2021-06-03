@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"go_demo_post/my_defer"
 	"go_demo_post/my_gc"
 	"go_demo_post/parse_text"
 	"go_demo_post/parse_text/rule"
@@ -16,9 +17,10 @@ type AuthSuccess struct {
 
 func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	//demoRegx()
+	//my_pointer.DebugPointer()
+	//return
 	//modifyTitle()
-
+	my_defer.DemoDefer()
 	//demo1rpc.DemoRpc1()
 	//demo_rpc_json.DemoRpcJson()
 	//demo_rpc_http.DemoRpcHttp()
