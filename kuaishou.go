@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
@@ -148,5 +150,62 @@ func demokuaishou() {
 }
 
 func aaaaa() {
+
+}
+
+func DemoFushi() {
+	_, fullFilename, _, _ := runtime.Caller(0)
+	fmt.Println(fullFilename)
+
+	var filename string
+	filename = path.Base(fullFilename)
+	fmt.Println("filename=", filename)
+
+	return
+
+	var data = make(map[string]map[string][]string)
+	data["备孕"] = make(map[string][]string)
+	data["孕期"] = make(map[string][]string)
+	data["辅食"] = make(map[string][]string)
+
+	filename = `C:\Users\Administrator\Desktop\8.33.0\8.52\功效映射(1).xlsx`
+	f, err := excelize.OpenFile(filename)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	rows, err := f.GetRows("Sheet1")
+
+	//rows = rows[:]
+	for _, row := range rows {
+
+		for k, colCell := range row {
+			if k == 0 || k == 1 {
+				continue
+			}
+			if row[0] == "" {
+				//log.Println(row[1])
+				for a, _ := range data {
+					log.Println(a, row[1], colCell)
+					data[a][row[1]] = append(data[a][row[1]], colCell)
+				}
+			} else {
+				if row[0] == "产后" {
+					row[0] = "辅食"
+				}
+
+				data[row[0]][row[1]] = append(data[row[0]][row[1]], colCell)
+			}
+
+		}
+
+	}
+
+	//b, _ := json.Marshal(data["备孕"])
+	b, _ := json.Marshal(data)
+	fmt.Println(string(b))
+	//fmt.Println("package app_index\n var IosConfig = []byte(`" + string(b) + "`)")
+	//ioutil.WriteFile("C:/Users/Administrator/Desktop/8.33.0/8.46/ios-app-search/ios_inner_search_data.go", []byte("package app_index\n var IosConfig = []byte(`"+string(b)+"`)"), 0755)
 
 }

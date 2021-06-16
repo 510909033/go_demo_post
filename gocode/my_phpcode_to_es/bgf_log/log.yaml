@@ -1,0 +1,15 @@
+stdout1:
+  enable: true
+  categories:
+    - "*"
+  logLevel: debug
+  logType: stdout
+stdout:
+  enable: true
+  categories:
+    - "*"
+  logLevel: debug
+  logType: file
+  logFile: e:/logs/logs/gogroup.log
+  logFLag:
+    - Llongfile

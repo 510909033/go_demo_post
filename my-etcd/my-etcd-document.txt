@@ -1,0 +1,69 @@
+etcd入门：
+https://etcd.io/docs/v3.5/quickstart/
+demo
+https://etcd.io/docs/v3.5/demo/
+
+
+【第一步】 etcd安装：
+wget https://github.com/etcd-io/etcd/releases/download/v3.5.0/etcd-v3.5.0-linux-amd64.tar.gz
+tar -zxf etcd-v3.5.0-linux-amd64.tar.gz
+cd etcd-v3.5.0-linux-amd64
+sudo cp etcd /usr/local/bin/
+sudo cp etcdctl /usr/local/bin/
+
+
+【第二步】 使用geroman安装本地etcd集群
+1. 安装 goreman
+    go get github.com/mattn/goreman
+    执行后可以使用goreman命令
+2. 编写procfile文件，内容如下：
+etcd1: etcd --name infra1 --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:12380 --initial-advertise-peer-urls http://0.0.0.0:12380 --initial-cluster-token etcd-cluster-1 --initial-cluster 'infra1=http://0.0.0.0:12380,infra2=http://0.0.0.0:22380,infra3=http://0.0.0.0:32380' --initial-cluster-state new --enable-pprof
+etcd2: etcd --name infra2 --listen-client-urls http://0.0.0.0:22379 --advertise-client-urls http://0.0.0.0:22379 --listen-peer-urls http://0.0.0.0:22380 --initial-advertise-peer-urls http://0.0.0.0:22380 --initial-cluster-token etcd-cluster-1 --initial-cluster 'infra1=http://0.0.0.0:12380,infra2=http://0.0.0.0:22380,infra3=http://0.0.0.0:32380' --initial-cluster-state new --enable-pprof
+etcd3: etcd --name infra3 --listen-client-urls http://0.0.0.0:32379 --advertise-client-urls http://0.0.0.0:32379 --listen-peer-urls http://0.0.0.0:32380 --initial-advertise-peer-urls http://0.0.0.0:32380 --initial-cluster-token etcd-cluster-1 --initial-cluster 'infra1=http://0.0.0.0:12380,infra2=http://0.0.0.0:22380,infra3=http://0.0.0.0:32380' --initial-cluster-state new --enable-pprof
+3. 启动etcd集群
+goreman -f procfile start
+
+
+export ETCDCTL_API=3
+HOST_1=0.0.0.0
+HOST_2=0.0.0.0
+HOST_3=0.0.0.0
+ENDPOINTS=$HOST_1:2379,$HOST_2:22379,$HOST_3:32379
+
+etcdctl --endpoints=$ENDPOINTS member list
+
+一些命令
+输出json
+etcdctl --endpoints=http://0.0.0.0:2379 get --write-out=json test_watch
+{"header":{"cluster_id":5159450488099491764,"member_id":12332047043913552131,"revision":7,"raft_term":2},"kvs":[{"key":"dGVzdF93YXRjaA==","create_revision":7,"mod_revision":7,"version":1,"value":"djE="}],"count":1}
+
+通过前缀获取
+etcdctl --endpoints=$ENDPOINTS put web1 value1
+etcdctl --endpoints=$ENDPOINTS put web2 value2
+etcdctl --endpoints=$ENDPOINTS put web3 value3
+
+etcdctl --endpoints=$ENDPOINTS get web --prefix
+
+
+【删除】
+etcdctl --endpoints=$ENDPOINTS put key myvalue
+etcdctl --endpoints=$ENDPOINTS del key
+
+etcdctl --endpoints=$ENDPOINTS put k1 value1
+etcdctl --endpoints=$ENDPOINTS put k2 value2
+前缀删除
+etcdctl --endpoints=$ENDPOINTS del k --prefix
+
+
+【事务写】
+etcdctl --endpoints=$ENDPOINTS put user1 bad
+etcdctl --endpoints=$ENDPOINTS txn --interactive
+
+compares:
+value("user1") = "bad"
+
+success requests (get, put, delete):
+del user1
+
+failure requests (get, put, delete):
+put user1 good

@@ -51,6 +51,20 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="go_myhome">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="go_preg_common_v1">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="go_preg_push">
         <serverdata>
           <mappings>

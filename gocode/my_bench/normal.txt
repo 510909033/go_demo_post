@@ -1,0 +1,21 @@
+gc 252 @4316.062s 0%: 0.013+2.9+0.050 ms clock, 0.10+0.23/5.4/12+0.40 ms cpu, 16->17->8 MB, 17 MB goal, 8 P
+
+
+gc 9 @124.113s 0%: 0.020+1.5+0.014 ms clock, 0.041+0/0.085/0+0.029 ms cpu, 15->15->8 MB, 16 MB goal, 2 P
+gc 11 @205.809s 0%: 0.002+2.5+0.005 ms clock, 0.004+0/0.057/2.5+0.010 ms cpu, 24->24->13 MB, 25 MB goal, 2 P
+
+gc 252： 这是第252次gc。
+
+@4316.062s： 这次gc的markTermination阶段完成后，距离runtime启动到现在的时间。
+
+0%：当目前为止，gc的标记工作（包括两次mark阶段的STW和并发标记）所用的CPU时间占总CPU的百分比。
+
+0.013+2.9+0.050 ms clock：按顺序分成三部分，0.013表示mark阶段的STW时间（单P的）；2.9表示并发标记用的时间（所有P的）；0.050表示markTermination阶段的STW时间（单P的）。
+
+0.10+0.23/5.4/12+0.40 ms cpu：按顺序分成三部分，0.10表示整个进程在mark阶段STW停顿时间(0.013 * 8)；0.23/5.4/12有三块信息，0.23是mutator assists占用的时间，5.4是dedicated mark workers+fractional mark worker占用的时间，12是idle mark workers占用的时间。这三块时间加起来会接近2.9*8(P的个数)；0.40 ms表示整个进程在markTermination阶段STW停顿时间(0.050 * 8)。
+
+16->17->8 MB：按顺序分成三部分，16表示开始mark阶段前的heap_live大小；17表示开始markTermination阶段前的heap_live大小；8表示被标记对象的大小。
+
+17 MB goal：表示下一次触发GC的内存占用阀值是17MB，等于8MB * 2，向上取整。
+
+8 P：本次gc共有多少个P。
