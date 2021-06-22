@@ -3,6 +3,7 @@ package my_etcd
 import (
 	"context"
 	"github.com/coreos/etcd/clientv3"
+	"github.com/coreos/etcd/clientv3/concurrency"
 	"log"
 
 	"testing"
@@ -18,21 +19,6 @@ func getCli() (*clientv3.Client, error) {
 		//Endpoints:   []string{IP2},
 		DialTimeout: 5 * time.Second,
 	})
-}
-
-func getCliV2() *clientv3.Client {
-	log.SetFlags(log.Lshortfile)
-	client, err := clientv3.New(clientv3.Config{
-		// 集群列表
-		//Endpoints:   []string{IP},
-		Endpoints: []string{IP, IP1, IP2},
-		//Endpoints:   []string{IP2},
-		DialTimeout: 5 * time.Second,
-	})
-	if err != nil {
-		panic(err)
-	}
-	return client
 }
 
 //监听 name
@@ -66,6 +52,7 @@ func TestEtcdWatch(t *testing.T) {
 	}()
 
 	select {}
+
 }
 
 /*
@@ -75,8 +62,9 @@ etcdctl --endpoints=$ENDPOINTS put web3 value3
 
 etcdctl --endpoints=$ENDPOINTS get web --prefix
 */
+//测试前缀
 func TestEtcdPrefix(t *testing.T) {
-	name := "web"
+	name := "v"
 	log.Println("前缀测试， 前缀=", name)
 	cli, err := getCli()
 	if err != nil {
@@ -90,12 +78,13 @@ func TestEtcdPrefix(t *testing.T) {
 
 	}()
 
-	response, err := cli.Get(ctx, "web", clientv3.WithPrefix())
+	response, err := cli.Get(ctx, name, clientv3.WithPrefix())
 	if err != nil {
 		log.Printf("err=%+v", err)
 		return
 	}
 	for k, v := range response.Kvs {
+		//log.Println(response.OpResponse().Get().Header)
 		log.Printf("k=%d, key=%s, val=%s", k, v.Key, v.Value)
 	}
 
@@ -119,6 +108,8 @@ func TestEtcdTransaction(t *testing.T) {
 
 	//txn.If()
 
+	//clientv3.NewLease().KeepAliveOnce()
+
 }
 
 /*
@@ -140,17 +131,114 @@ func TestEtcdLease_create(t *testing.T) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel
+
 	// minimum lease TTL is 5-second
-	ttl := 5
-	resp, err := cli.Create(ctx, int64(ttl))
+	ttl := 3
+	key := "foo"
+	log.Println("续约", ttl, "秒时间")
+	resp, err := cli.Grant(ctx, int64(ttl))
 	if err != nil {
 		log.Printf("resp=%+v", resp)
 		log.Fatal(err)
 	}
+	log.Println("grant续约成功")
+
+	keepAliveFunc := func() {
+		for {
+			keepAliveResponses, err := cli.KeepAlive(ctx, resp.ID)
+			if err != nil {
+				log.Printf("KeepAlive返回了err=%+v", err)
+			}
+			//如果出现了取消，等错误，这里会收到结果
+			kaVal := <-keepAliveResponses
+			log.Printf("chan keepAliveResponses, res=%+v", kaVal)
+			break
+		}
+	}
+	_ = keepAliveFunc
+
+	getVal := func(key string) {
+		i := 0
+		for {
+			response, err := cli.Get(ctx, key)
+			if err != nil {
+				log.Printf("获取key=%s的值失败,err=%+v", key, err)
+				return
+			}
+			if len(response.Kvs) == 0 {
+				log.Printf("key=%s的值为不存在或已过期", key)
+			} else {
+				log.Printf("获取key=%s的值为：%s", key, response.Kvs[0].Value)
+			}
+			time.Sleep(time.Millisecond * 500)
+			i++
+			if i > 50 {
+				//cancel()
+			}
+		}
+	}
+
+	//go getVal(key)
+
+	go keepAliveFunc()
+
+	sleepTs := 3
+	log.Println("暂停", sleepTs, "秒钟")
+	time.Sleep(time.Second * time.Duration(sleepTs))
 
 	// after 5 seconds, the key 'foo' will be removed
-	_, err = cli.Put(context.TODO(), "foo", "bar", clientv3.WithLease(clientv3.LeaseID(resp.ID)))
+	log.Printf("开始设置key=%s的值", key)
+	putResponse, err := cli.Put(context.TODO(), key, "bar", clientv3.WithLease(resp.ID))
+	_ = putResponse
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("put失败", err)
 	}
+	log.Printf("设置key=%s的值成功", key)
+
+	time.Sleep(time.Millisecond * 101)
+	getVal(key)
+
+}
+
+//分布式锁
+func TestEtcdDistributed_Lock(t *testing.T) {
+	client := getCliV2()
+	keyPrefix := "/lock"
+
+	// 生成一个30s超时的上下文
+	timeout, cancelFunc := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelFunc()
+	// 获取租约
+	response, e := client.Grant(timeout, 1)
+	if e != nil {
+		log.Fatal(e.Error())
+	}
+	log.Println("获取租约成功")
+	// 通过租约创建session
+	session, e := concurrency.NewSession(client, concurrency.WithLease(response.ID))
+	if e != nil {
+		log.Fatal(e.Error())
+	}
+	defer session.Close()
+	log.Println("使用租约创建session成功")
+
+	// 通过session和锁前缀
+	mutex := concurrency.NewMutex(session, keyPrefix)
+	//return &lockerMutex{NewMutex(s, pfx)}
+	e = mutex.Lock(timeout)
+	if e != nil {
+		log.Fatal(e.Error())
+	}
+
+	// 业务逻辑
+	log.Println("执行业务逻辑")
+	time.Sleep(time.Second * 31)
+
+	// 释放锁
+	defer func() {
+		log.Println("开始执行unlock")
+		unlock := mutex.Unlock(timeout)
+		log.Println("unlock结果：", unlock)
+	}()
+
 }

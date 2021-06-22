@@ -3,6 +3,7 @@ package my_etcd
 import (
 	"context"
 	"github.com/coreos/etcd/clientv3"
+	"go_demo_post/my-etcd/discovery"
 	"log"
 	"os"
 	"strconv"
@@ -92,8 +93,38 @@ func AutoSetDirSubVal(ctx context.Context, cli *clientv3.Client, dir string) {
 	}
 
 }
+func getCliV2() *clientv3.Client {
+	log.SetFlags(log.Lshortfile)
+	client, err := clientv3.New(clientv3.Config{
+		// 集群列表
+		//Endpoints:   []string{IP},
+		Endpoints: []string{IP, IP1, IP2},
+		//Endpoints:   []string{IP2},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		panic(err)
+	}
 
+	return client
+}
 func DemoMyEtcd() {
+	//log.Println(discovery.GetLocalIP())
+	//return
+
+	client := getCliV2()
+	service := discovery.DiscoveryService{}
+	//go service.Start(client, "/test/demo")
+
+	service.DemoMultiHttpAndRegister(client, "/test/http_server")
+
+	//go service.DemoPut(client, "/test/demo")
+	//for i := 0; i < 1000; i++ {
+	//	go service.DemoPut(getCliV2(), "/test/demo")
+	//}
+	//select {}
+}
+func demoMyEtcd() {
 	cli := NewClient()
 	key := "h5"
 	_ = key

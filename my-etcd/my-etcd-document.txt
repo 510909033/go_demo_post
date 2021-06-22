@@ -3,6 +3,32 @@ https://etcd.io/docs/v3.5/quickstart/
 demo
 https://etcd.io/docs/v3.5/demo/
 
+etcd lock详解
+https://tangxusc.github.io/blog/2019/05/etcd-lock%E8%AF%A6%E8%A7%A3/
+
+etcd elect 选举
+https://cloud.tencent.com/developer/article/1458456
+
+etcd指标：
+https://etcd.io/docs/v3.5/metrics/
+
+go kit 有时间再看
+https://gokit.io/examples/
+
+etcd配置说明：
+https://developer.aliyun.com/article/765312    [实验中]
+     http://172.20.10.40:2379/v3/keys/discovery/6c007a14875d53d9bf0ef5a6fc0257c817f0fb83
+     curl -X PUT http://example.com/v2/keys/_etcd/registry/${UUID}/_config/size -d value=${cluster_size}
+     curl -X PUT http://172.20.10.40:2379/v2/keys/_etcd/registry/6c007a14875d53d9bf0ef5a6fc0257c817f0fb83/_config/size -d value=3
+
+https://blog.csdn.net/liyingke112/article/details/78114268 [待实验]
+
+常见错误：
+rpc error: code = 1 desc = "context canceled"
+https://www.jianshu.com/p/34e778434c86
+go get github.com/coreos/etcd/clientv3@v3.3.25
+
+
 
 【第一步】 etcd安装：
 wget https://github.com/etcd-io/etcd/releases/download/v3.5.0/etcd-v3.5.0-linux-amd64.tar.gz
@@ -67,3 +93,59 @@ del user1
 
 failure requests (get, put, delete):
 put user1 good
+
+
+
+
+
+
+
+集群自动发现
+https://discovery.etcd.io/new?size=3
+
+UUID=$(uuidgen)
+
+curl -X PUT http://172.20.10.40:2379/v3/keys/discovery/6c007a14875d53d9bf0ef5a6fc0257c817f0fb83/_config/size -d value=3
+
+etcd1: etcd  --name etcd1 --initial-advertise-peer-urls http://172.20.10.40:2380 \
+  --listen-peer-urls http://172.20.10.40:2380 \
+  --data-dir /opt/etcd/data \
+  --listen-client-urls http://172.20.10.40:2379,http://127.0.0.1:2379 \
+  --advertise-client-urls http://172.20.10.40:2379 \
+  --discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+etcd2: etcd  --name etcd2 --initial-advertise-peer-urls http://172.20.10.40:12380 \
+  --listen-peer-urls http://172.20.10.40:12380 \
+  --data-dir /opt/etcd/data \
+  --listen-client-urls http://172.20.10.40:2379,http://127.0.0.1:2379 \
+  --advertise-client-urls http://172.20.10.40:2379 \
+  --discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+etcd3: etcd  --name etcd3 --initial-advertise-peer-urls http://172.20.10.40:2380 \
+    --listen-peer-urls http://172.20.10.40:2380 \
+    --data-dir /opt/etcd/data \
+    --listen-client-urls http://172.20.10.40:2379,http://127.0.0.1:2379 \
+    --advertise-client-urls http://172.20.10.40:2379 \
+    --discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+
+
+etcd1: etcd  --name etcd1 --initial-advertise-peer-urls http://172.20.10.40:2380   --listen-peer-urls http://172.20.10.40:2380   --data-dir /opt/etcd/data   --listen-client-urls http://172.20.10.40:2379,http://127.0.0.1:2379   --advertise-client-urls http://172.20.10.40:2379   --discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+etcd2: etcd  --name etcd2 --initial-advertise-peer-urls http://172.20.10.40:12380   --listen-peer-urls http://172.20.10.40:12380   --data-dir /opt/etcd/data   --listen-client-urls http://172.20.10.40:2379,http://127.0.0.1:2379   --advertise-client-urls http://172.20.10.40:2379   --discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+etcd3: etcd  --name etcd3 --initial-advertise-peer-urls http://172.20.10.40:22380    --listen-peer-urls http://172.20.10.40:22380     --data-dir /opt/etcd/data     --listen-client-urls http://172.20.10.40:2379,http://127.0.0.1:2379     --advertise-client-urls http://172.20.10.40:2379     --discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

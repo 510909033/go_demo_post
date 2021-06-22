@@ -1,6 +1,7 @@
 package main
 
 import (
+	my_etcd "go_demo_post/my-etcd"
 	"go_demo_post/my_groutinue/multi_groutinue2"
 	"log"
 )
@@ -8,7 +9,8 @@ import (
 func main() {
 
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	DemoFushi()
+	//DemoFushi()
+	my_etcd.DemoMyEtcd()
 	return
 
 	//my_groutinue.DemoGroutinue()
