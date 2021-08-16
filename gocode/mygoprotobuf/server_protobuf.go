@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 
@@ -12,9 +14,20 @@ import (
 	//"github.com/gogo/protobuf/proto"
 )
 
+/*
+开启一个 服务，
+go run server_protobuf.go --ip localhost --port 12345
+ */
 func main() {
+	ip := flag.String("ip", "localhost", "ip")
+	port := flag.String("port", "6600", "端口")
+	flag.Parse()
+
+	log.Println("ip=", ip, *ip)
+	log.Println("port=", port, *port)
+
 	//监听
-	listener, err := net.Listen("tcp", "localhost:6600")
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%s", *ip,*port))
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +37,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("new connect", conn.RemoteAddr())
+		log.Println("new connect", conn.RemoteAddr())
 		go readMessage(conn)
 	}
 }
@@ -49,7 +62,7 @@ func readMessage(conn net.Conn) {
 			panic(err)
 		}
 
-		fmt.Println("receive", conn.RemoteAddr(), stReceive)
+		log.Println("receive", conn.RemoteAddr(), stReceive)
 
 		conn.Write([]byte("hei哈dddddddddddddddddddddddddddddddddddddddddddddd"))
 		if stReceive.Message == "stop" {

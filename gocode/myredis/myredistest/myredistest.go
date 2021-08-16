@@ -2,6 +2,9 @@ package myredistest
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -37,15 +40,31 @@ func SetMulti(max int) {
 var incrSyncM sync.Map
 var w sync.WaitGroup
 
+func LuaDel() {
+	filename := "/home/wangbaotian/go_demo_post/gocode/myredis/lua/del.lua"
+	bytes, e := ioutil.ReadFile(filename)
+	errPanic(e)
+
+	key := "lua_del_test"
+	client.Set(key, "val", time.Minute)
+	eval := client.Eval(string(bytes), []string{key}, []interface{}{"val"}...)
+	log.Printf("%+v", eval.Err())
+	log.Printf("%+v", eval.Val())
+}
+
 func GetId() {
-	key := fmt.Sprintf("%d", time.Now().Unix())
+
+	key := fmt.Sprintf("%d", time.Now().UnixNano())
+	log.Println("key=", key)
+
 	for i := 0; i < 3; i++ {
 		w.Add(1)
 		go func() {
 			defer w.Done()
 			cmd := client.Incr(key)
+			log.Println(cmd.Result())
 			if cmd.Err() != nil {
-				fmt.Println(cmd.Err())
+				log.Println(cmd.Err())
 				return
 			}
 			id := cmd.Val()
@@ -62,11 +81,85 @@ func GetId() {
 
 	w.Wait()
 	incrSyncM.Range(func(key, val interface{}) bool {
-		fmt.Println(key, val)
+		log.Println(key, val)
 		return true
 	})
 	v, ok := incrSyncM.Load(int64(1))
-	fmt.Println(v, ok)
+	log.Println(v, ok)
+
+	//ch := NewClientConn()
+	//<-ch
+}
+
+func LuaSomeMethod() {
+	filename := "/home/wangbaotian/go_demo_post/gocode/myredis/lua/some_method.lua"
+
+	key := "LuaSomeMethod"
+	client.Set(key, "LuaSomeMethod", time.Minute)
+
+	bytes, e := ioutil.ReadFile(filename)
+	errPanic(e)
+
+	stringCmd := client.ScriptLoad(string(bytes))
+	errPanic(stringCmd.Err())
+	log.Println(stringCmd)
+
+	hashids, e := stringCmd.Result()
+	errPanic(e)
+	log.Println("hashids", hashids)
+
+	time.Sleep(time.Second)
+	exists := client.ScriptExists(hashids)
+	log.Println(exists)
+
+	cmd := client.EvalSha(hashids, []string{key}, []interface{}{"mmm"}...)
+	log.Println(cmd)
+	log.Printf("%#v", cmd.Val())
+
+}
+
+func LuaSomeMethod2() {
+	filename := "/home/wangbaotian/go_demo_post/gocode/myredis/lua/some_method2.lua"
+
+	key := "LuaSomeMethod"
+	client.Set(key, "LuaSomeMethod", time.Minute)
+
+	bytes, e := ioutil.ReadFile(filename)
+	errPanic(e)
+
+	cmd := client.Eval(string(bytes), []string{"{k}1", "{k}2", "{k}3", "{k}4"}, []interface{}{"a1", "a2", "a3", "a4"}...)
+	log.Printf("%#v", cmd)
+	log.Printf("%#v", cmd.Val())
+
+}
+
+func Mset() {
+	var list []interface{}
+
+	for i := 0; i < 10; i++ {
+		//mset mset_0 val0 mset_1 val1 mset_2 val2 mset_3 val3 mset_4 val4 mset_5 val5 mset_6 val6 mset_7 val7 mset_8 val8 mset_9 val9:
+		// CROSSSLOT Keys in request don't hash to the same slot
+		//list = append(list, "mset_"+strconv.Itoa(i), "val"+strconv.Itoa(i))
+
+		list = append(list, "{mset}_"+strconv.Itoa(i), "val"+strconv.Itoa(i))
+	}
+
+	cmd := client.MSet(list...)
+	cmd1 := client.MSetNX(list...)
+	log.Println(cmd)
+	log.Println(cmd1)
+}
+
+func Mget() {
+	var list []string
+
+	for i := 0; i < 10; i++ {
+		list = append(list, "{mset}_"+strconv.Itoa(i))
+		//list = append(list, "{mset}_"+strconv.Itoa(i), "val"+strconv.Itoa(i))
+	}
+
+	cmd := client.MGet(list...)
+	log.Println(cmd)
 }
 
 func AddData(val int) {

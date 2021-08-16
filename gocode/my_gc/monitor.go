@@ -1,8 +1,8 @@
-package main
+package my_gc
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"runtime"
 	"time"
 )
@@ -133,7 +133,7 @@ type MyMemStats struct {
 	}
 }
 
-func NewMonitor(duration int) {
+func MyNewGcMonitor(duration int) {
 	var m Monitor
 	var rtm runtime.MemStats
 	var interval = time.Duration(duration) * time.Second
@@ -158,7 +158,7 @@ func NewMonitor(duration int) {
 		m.NumGC = rtm.NumGC
 
 		b, _ := json.Marshal(m)
-		fmt.Println(string(b))
+		log.Println(string(b))
 		//fmt.Printf("%#v\n",rtm)
 
 	}

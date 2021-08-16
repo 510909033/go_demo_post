@@ -11,6 +11,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/juju/ratelimit v1.0.1
+	github.com/prometheus/client_golang v1.11.0
 	github.com/streadway/amqp v1.0.0
 	go.mongodb.org/mongo-driver v1.5.3
 )

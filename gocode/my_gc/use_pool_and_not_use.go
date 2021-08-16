@@ -1,7 +1,7 @@
-package main
+package my_gc
 
 import (
-	"fmt"
+	"log"
 	"sync"
 	"time"
 	//"github.com/astaxie/beego/logs"
@@ -22,11 +22,11 @@ var userPool = sync.Pool{
 
 func (s usePool) testUsePool() {
 	defer useTimes()()
-	go NewMonitor(1)
+	go MyNewGcMonitor(1)
 	//go printMemStats()
 	//go printGCStats()
 	time.Sleep(time.Second * 5)
-	fmt.Println("Start ....")
+	log.Println("Start ....")
 
 	var user *User
 	for {

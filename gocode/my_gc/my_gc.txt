@@ -1,0 +1,22 @@
+
+https://zhuanlan.zhihu.com/p/184964954
+GODEBUG=gctrace=1 go test -bench=^BenchmarkMapPointer$ -benchmem
+
+gc 3 @0.130s 19%: 0.006+424+0.013 ms clock, 0.027+0.18/424/848+0.055 ms cpu, 1224->1224->1224 MB, 1225 MB goal, 4 P
+gc 4 @9.410s 2%: 0.005+543+0.002 ms clock, 0.022+0/543/1628+0.011 ms cpu, 1325->1325->1323 MB, 2448 MB goal, 4 P (forced)
+gc 5 @9.957s 3%: 0.003+547+0.003 ms clock, 0.013+0/547/1631+0.013 ms cpu, 1323->1323->1323 MB, 2647 MB goal, 4 P (forced)
+With map[int]*int, GC took 550.40821ms
+
+为了理解打印的日志，我们要理解gctrace, 以0.013+0/547/1631+0.013 ms cpu为例子，GC分为三个阶段。
+- Mark Prepare (STW) 。0.013表示标记阶段的全局暂停（stop the wrold）时间。
+- Marking。0/547/1631, 0表示mutator assist的耗时，547，1631都是标记GC的耗时。
+- Mark Termination (STW)。0.013表示标记结束阶段的全局暂停（stop the wrold）时间。
+
+GC分析的工具
+go tool pprof
+go tool trace
+go build -gcflags=”-m”
+GODEBUG=”gctrace=1”
+
+
+

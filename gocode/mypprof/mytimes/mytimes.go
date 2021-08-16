@@ -20,7 +20,15 @@ curl -s http://127.0.0.1:8005/debug/pprof/heap > current.heap
 go tool pprof --base base.heap current.heap
 go tool pprof --http :9090 --base base.heap current.heap
 
+go tool pprof http://localhost:8005/debug/pprof/profile?seconds=30
+go tool pprof http://localhost:8005/debug/pprof/heap
+go tool pprof http://localhost:8005/debug/pprof/profile?seconds=30
 
+http://go.wangbaotian.babytree-dev.com/go_pregnancy/go_internal/debug/pprof/profile
+http://go.wangbaotian.babytree-dev.com/go_pregnancy/go_internal/debug/pprof/allocs
+http://go.wangbaotian.babytree-dev.com/go_pregnancy/go_internal/debug/pprof/heap
+http://go.wangbaotian.babytree-dev.com/go_pregnancy/go_internal/debug/pprof/goroutine
+http://go.wangbaotian.babytree-dev.com/go_pregnancy/go_internal/debug/pprof/mutex
 
 */
 
