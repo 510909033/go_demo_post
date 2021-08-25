@@ -1,21 +1,50 @@
 package main
 
 import (
-	my_etcd "go_demo_post/my-etcd"
-	"go_demo_post/my_groutinue/multi_groutinue2"
+	"go_demo_post/gocode/reg"
+	_ "go_demo_post/gocode/reg"
+	"net/http"
+	"os"
+	"strconv"
+
+	//"go_demo_post/my_prometheus/monitor/demo3"
 	"log"
+	_ "net/http/pprof"
 )
 
 func main() {
 
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	reg.IndexFunc.Dump()
+
+	go func() {
+		log.Println("pprof port = ", 8005)
+		log.Println(http.ListenAndServe("0.0.0.0:8005", nil))
+	}()
+
+	indexStr := ""
+	if len(os.Args) > 1 {
+		indexStr = os.Args[1]
+	}
+	index, _ := strconv.ParseInt(indexStr, 10, 64)
+	if index > 0 {
+		reg.Func[reg.IndexFunc[int(index)]]()
+	}
+	//gob_true_interface2.MyGobInterface()
+	//log.Println()
+
 	//DemoFushi()
-	my_etcd.DemoMyEtcd()
+	//my_etcd.DemoMyEtcd()
+	//my_groutinue_cpu_only_one.DemoMyGroutinueCpuOnlyOne()
+	//go my_guage.MyGauge()
+	//demo3.GetUserInfo()
+	//go my_summary.MySummary()
+	//my_counter.MyPrometheus()
 	return
 
 	//my_groutinue.DemoGroutinue()
 	//multi_groutinue.DemoMultiGroutinue()
-	multi_groutinue2.DemoMultiGroutinue2()
+	//multi_groutinue2.DemoMultiGroutinue2()
 	//my_pointer.DebugPointer()
 	//return
 	//modifyTitle()

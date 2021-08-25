@@ -1,4 +1,4 @@
-package main
+package my_race
 
 import (
 	"fmt"

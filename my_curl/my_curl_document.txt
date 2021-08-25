@@ -1,0 +1,28 @@
+1、测试过程
+curl 'https://xx.cnblogs.com/semanticAnalysis/api2?' -d 'app_id=2882303761517406029&token=5651740635029&timestamp=1493188096125&queries=[{"query":"打开越野跑","confidence":0.8}]&device_id=robot_aaaUG6LExb9Fsc80taeUv&device={"ip":"192.168.1.1","network":"wifi"}&session={"is_new":true,"id":"","start_timestamp":1493188096125}&request_id=afaaaa&version=2.1' -o /dev/null -s -w '@curl-format.txt'
+
+结果
+time_namelookup: 0.124time_connect: 0.148time_appconnect: 0.338time_redirect: 0.000time_pretransfer: 0.338time_starttransfer: 0.382----------time_total: 0.382
+
+-w ：从文件中读取要打印信息的格式
+-o /dev/null ：把响应的内容丢弃，因为我们这里并不关心它，只关心请求的耗时情况
+-s ：不要打印进度条
+
+从这个输出，我们可以算出各个步骤的时间：
+
+DNS 查询：124ms
+TCP 连接时间： pretransfter(148) - namelookup(124) = 24ms
+服务器处理时间：starttransfter(382) - pretransfer(338) = 44ms
+内容传输时间： total(0.382) - starttransfer(0.382) = 0ms
+
+2、curl-format.txt文件配置
+time_namelookup: %{time_namelookup}\n time_connect: %{time_connect}\n time_appconnect: %{time_appconnect}\n time_redirect: %{time_redirect}\n time_pretransfer: %{time_pretransfer}\n time_starttransfer: %{time_starttransfer}\n ----------\n time_total: %{time_total}\n3、变量解释
+
+time_namelookup ：DNS 域名解析的时候，就是把 https://zhihu.com 转换成 ip 地址的过程
+time_connect ：TCP 连接建立的时间，就是三次握手的时间
+time_appconnect ：SSL/SSH 等上层协议建立连接的时间，比如 connect/handshake 的时间
+time_redirect ：从开始到最后一个请求事务的时间
+time_pretransfer ：从请求开始到响应开始传输的时间
+time_starttransfer ：从请求开始到第一个字节将要传输的时间
+time_total ：这次请求花费的全部时间
+

@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
+	"sync"
 	"time"
 
 	stProto "baotian0506.com/mygoprotobuf/proto"
@@ -15,7 +17,21 @@ import (
 )
 
 func main() {
-	demo1()
+	var wg sync.WaitGroup
+	size:= 1
+	wg.Add(size)
+
+	//并发连接到服务端
+	for i:=0;i<size;i++{
+		go func() {
+			defer wg.Done()
+			demo1()
+		}()
+	}
+
+	log.Println("wg.waiting")
+	wg.Wait()
+	log.Println("main over")
 }
 func demo1() {
 	strIP := "localhost:6600"
@@ -28,7 +44,7 @@ func demo1() {
 		time.Sleep(time.Second)
 		fmt.Println("reconnect...")
 	}
-	fmt.Println("connect", strIP, "success")
+	log.Println("connect", strIP, "success")
 	defer conn.Close()
 
 	//发送消息
@@ -48,12 +64,21 @@ func demo1() {
 			panic(err)
 		}
 
+		log.Printf("pData=%b",(pData))
 		//发送
-		conn.Write(pData)
+		writeLen, err := conn.Write(pData)
+		log.Printf("writeLen , len=%v, err=%v",writeLen,err)
 
-		var b = make([]byte, 20)
-		conn.Read(b)
-		fmt.Println("read ", b)
+
+		var b = make([]byte, 2011)
+		n, err := conn.Read(b)
+
+		var reciveData stProto.UserInfo
+		proto.Unmarshal(b[:n], &reciveData)
+
+		log.Printf("red result, readLen=%v, err=%v",n,err)
+		log.Printf("read content = %s ", string(b[:n]))
+		log.Printf("read reciveData = %+v ", reciveData)
 		if sender.Text() == "stop" {
 			return
 		}

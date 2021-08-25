@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData">
+  <component name="PublishConfigData" autoUpload="Always" serverName="go-demo-post">
     <serverData>
       <paths name="192.168.6.3-go_menu">
         <serverdata>
@@ -23,10 +23,10 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="go_ask">
+      <paths name="go-demo-post">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="./" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
@@ -79,6 +79,20 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="go_search">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="new-go_ask">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="remote-go-pregnancy">
         <serverdata>
           <mappings>
@@ -94,5 +108,6 @@
         </serverdata>
       </paths>
     </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
   </component>
 </project>
