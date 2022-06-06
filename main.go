@@ -17,6 +17,9 @@ func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	reg.IndexFunc.Dump()
 
+	//mystruct.DemoRangeTest()
+	//return
+
 	go func() {
 		log.Println("pprof port = ", 8005)
 		log.Println(http.ListenAndServe("0.0.0.0:8005", nil))

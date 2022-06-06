@@ -51,7 +51,7 @@ func printMemStats() {
 		}
 	}
 }
-func main() {
+func DemoGcUserPool() {
 
 	var a usePool
 	a.testUsePool()

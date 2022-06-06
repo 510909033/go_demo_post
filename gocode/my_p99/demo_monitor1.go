@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var FeedsMonitor = NewP99()
+var FeedsMonitor = NewP99
 
 func DemoMyP99() {
 	log.SetFlags(log.Llongfile)
@@ -20,6 +20,7 @@ func DemoMyP99() {
 
 	source := rand.NewSource(time.Now().UnixNano())
 
+	feedsMonitor := FeedsMonitor()
 	for {
 		wg.Add(1)
 		ch <- struct{}{}
@@ -30,7 +31,7 @@ func DemoMyP99() {
 			}()
 			randNew := rand.New(source)
 			//FeedsMonitor.Observe((randNew.Float64()+0.0000001) * 3)
-			FeedsMonitor.Observe(int64(randNew.Intn(1000)))
+			feedsMonitor.Observe(int64(randNew.Intn(1000)))
 		}()
 		time.Sleep(time.Millisecond) //todo
 	}

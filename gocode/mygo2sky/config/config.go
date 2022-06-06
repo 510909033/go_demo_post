@@ -1,7 +1,9 @@
 package config
 
 const (
-	SERVER_ADDR                       = "localhost:11800"
+	//SERVER_ADDR                       = "172.16.7.61:11800"
+	SERVER_ADDR = "localhost:11800"
+	//SERVER_ADDR                       = "172.20.10.40:11800"
 	httpClientComponentID       int32 = 2
 	mysqlComponentID            int32 = 5
 	redisComponentID            int32 = 7

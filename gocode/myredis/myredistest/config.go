@@ -15,6 +15,7 @@ const (
 )
 
 var client *redis.ClusterClient
+var client1 *redis.ClusterClient
 
 //var client *redis.Client
 
@@ -52,6 +53,7 @@ func init() {
 	//client = redis.NewClient(opt)
 
 	client = GetClusterClient()
+	client1 = GetClusterClient()
 }
 
 func GetClusterClient() *redis.ClusterClient {

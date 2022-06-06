@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -52,7 +53,48 @@ func LuaDel() {
 	log.Printf("%+v", eval.Val())
 }
 
+func Big() {
+	key := "{sadd}_test2"
+
+	size := 120
+	val := make([]interface{}, size)
+	for i := 0; i < size; i++ {
+		val[i] = i
+	}
+	client.SAdd(key, val...)
+	val = make([]interface{}, size)
+	for i := 0; i < size; i++ {
+		val[i] = i + size
+	}
+	client.SAdd(key, val...)
+	log.Println("sadd success")
+
+	go func() {
+		log.Println("smember start")
+		t := time.Now()
+		members := client1.SMembers(key)
+		strings, _ := members.Result()
+		log.Println("smember", len(strings), time.Since(t).Milliseconds())
+	}()
+
+	runtime.Gosched()
+	go func() {
+		for i := 0; i < 20; i++ {
+			t := time.Now()
+			client.Get("{sadd}_ha" + strconv.Itoa(i))
+			log.Println(i, time.Since(t).Milliseconds())
+			//runtime.Gosched()
+		}
+	}()
+
+	time.Sleep(time.Second * 3)
+
+}
+
 func GetId() {
+
+	Big()
+	return
 
 	key := fmt.Sprintf("%d", time.Now().UnixNano())
 	log.Println("key=", key)

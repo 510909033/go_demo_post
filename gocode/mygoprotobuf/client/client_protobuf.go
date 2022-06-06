@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/golang/protobuf/jsonpb"
+	"google.golang.org/protobuf/encoding/protojson"
 	"log"
 	"net"
 	"os"
@@ -18,11 +20,11 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
-	size:= 1
+	size := 1
 	wg.Add(size)
 
 	//并发连接到服务端
-	for i:=0;i<size;i++{
+	for i := 0; i < size; i++ {
 		go func() {
 			defer wg.Done()
 			demo1()
@@ -64,19 +66,25 @@ func demo1() {
 			panic(err)
 		}
 
-		log.Printf("pData=%b",(pData))
+		log.Printf("pData=%b", (pData))
 		//发送
 		writeLen, err := conn.Write(pData)
-		log.Printf("writeLen , len=%v, err=%v",writeLen,err)
-
+		log.Printf("writeLen , len=%v, err=%v", writeLen, err)
 
 		var b = make([]byte, 2011)
 		n, err := conn.Read(b)
 
 		var reciveData stProto.UserInfo
 		proto.Unmarshal(b[:n], &reciveData)
+		_ = protojson.MarshalOptions{}
+		//ptypes.
+		//duration.
 
-		log.Printf("red result, readLen=%v, err=%v",n,err)
+		//reciveData.ProtoMessage()
+		s, err := (&jsonpb.Marshaler{}).MarshalToString(&reciveData)
+		log.Println("jsonpb.Marshaler.MarshalToString", "res=", s, "err=", err)
+
+		log.Printf("red result, readLen=%v, err=%v", n, err)
 		log.Printf("read content = %s ", string(b[:n]))
 		log.Printf("read reciveData = %+v ", reciveData)
 		if sender.Text() == "stop" {

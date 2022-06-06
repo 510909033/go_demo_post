@@ -16,6 +16,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="bgf_message_queue">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="demo">
         <serverdata>
           <mappings>
@@ -44,13 +51,6 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="go_message_queue">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="go_myhome">
         <serverdata>
           <mappings>
@@ -72,6 +72,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="go_pregnancy_my_test">
+        <serverdata>
+          <mappings>
+            <mapping deploy="./" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="go_prev_ve">
         <serverdata>
           <mappings>
@@ -86,7 +93,28 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="go_wetime">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="grpc-go">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="new-go_ask">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="p99">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -101,6 +129,13 @@
         </serverdata>
       </paths>
       <paths name="remote-go-tool-depl">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="rpcxdump">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

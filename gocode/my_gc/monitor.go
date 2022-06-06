@@ -134,34 +134,44 @@ type MyMemStats struct {
 }
 
 func MyNewGcMonitor(duration int) {
-	var m Monitor
-	var rtm runtime.MemStats
 	var interval = time.Duration(duration) * time.Second
 	//var goroutines = expvar.NewInt("num_goroutine")
+
+	//byteToM := func(byteNum int64) string {
+	//	return ""
+	//}
 
 	for {
 		<-time.After(interval) // 时间间隔
 
-		// 读取内存状态信息
-		runtime.ReadMemStats(&rtm)
-
-		m.NumGoroutine = runtime.NumGoroutine()
-		//goroutines.Set(int64(m.NumGoroutine))
-
-		m.Alloc = rtm.Alloc
-		m.TotalAlloc = rtm.TotalAlloc
-		m.Sys = rtm.Sys
-		m.Mallocs = rtm.Mallocs
-		m.Frees = rtm.Frees
-		m.LiveObjects = m.Mallocs - m.Frees
-		m.PauseTotalNs = rtm.PauseTotalNs
-		m.NumGC = rtm.NumGC
-
-		b, _ := json.Marshal(m)
-		log.Println(string(b))
-		//fmt.Printf("%#v\n",rtm)
+		DumpOnce()
 
 	}
+}
+
+func DumpOnce() {
+	var m Monitor
+	var rtm runtime.MemStats
+
+	// 读取内存状态信息
+	runtime.ReadMemStats(&rtm)
+
+	m.NumGoroutine = runtime.NumGoroutine()
+	//goroutines.Set(int64(m.NumGoroutine))
+
+	m.Alloc = rtm.Alloc
+	m.TotalAlloc = rtm.TotalAlloc
+	m.Sys = rtm.Sys
+	m.Mallocs = rtm.Mallocs
+	m.Frees = rtm.Frees
+	m.LiveObjects = m.Mallocs - m.Frees
+	m.PauseTotalNs = rtm.PauseTotalNs
+	m.NumGC = rtm.NumGC
+
+	b, _ := json.Marshal(m)
+	log.Println(string(b))
+	//fmt.Printf("%#v\n",rtm)
+
 }
 
 /*

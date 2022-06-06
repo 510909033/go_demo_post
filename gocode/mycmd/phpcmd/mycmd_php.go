@@ -1,4 +1,4 @@
-package main
+package phpcmd
 
 import (
 	"bytes"
@@ -18,7 +18,7 @@ type Php struct {
 func (s *Php) shellout(command string) (error, string, string) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	cmd := exec.Command("php.exe", command)
+	cmd := exec.Command("php", command)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -33,8 +33,8 @@ func (s *Php) Start() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			//			err, out, errout := s.shellout(`./demo_php.php`) //执行一个php
-			err, out, errout := s.shellout(`E:/push-save_data.php`) //执行一个php
+			err, out, errout := s.shellout(`./demo_php.php`) //执行一个php
+			//err, out, errout := s.shellout(`E:/push-save_data.php`) //执行一个php
 			if err != nil {
 				log.Printf("error: %v\n", err)
 			}

@@ -36,7 +36,7 @@ func (u *User) String() string {
 	return "user string"
 }
 
-func main() {
+func DemoRace1() {
 	var wg sync.WaitGroup
 	counter := NewCounter()
 	max := 100
