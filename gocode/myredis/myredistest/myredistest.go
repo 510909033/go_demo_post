@@ -2,6 +2,7 @@ package myredistest
 
 import (
 	"fmt"
+	"github.com/go-redis/redis"
 	"io/ioutil"
 	"log"
 	"runtime"
@@ -53,6 +54,22 @@ func LuaDel() {
 	log.Printf("%+v", eval.Val())
 }
 
+func debug(cmder redis.Cmder) {
+	ret := map[string]interface{}{
+		"Err()-redis.nil": cmder.Err() == redis.Nil,
+		"Err()":           cmder.Err(),
+		"Name()":          cmder.Name(),
+		//"String()":        cmder.String(),
+		"Args()": cmder.Args(),
+		//"FullName()":      cmder.FullName(),
+	}
+	log.Printf("ret=%+v\n", ret)
+	if cmder.Err() != nil {
+		log.Printf("ERROR: %+v", cmder.Err())
+		//panic(cmder.Err())
+	}
+}
+
 func Big() {
 	key := "{sadd}_test2"
 
@@ -61,7 +78,9 @@ func Big() {
 	for i := 0; i < size; i++ {
 		val[i] = i
 	}
-	client.SAdd(key, val...)
+	intCmd := client.SAdd(key, val...)
+	debug(intCmd)
+
 	val = make([]interface{}, size)
 	for i := 0; i < size; i++ {
 		val[i] = i + size
@@ -72,7 +91,7 @@ func Big() {
 	go func() {
 		log.Println("smember start")
 		t := time.Now()
-		members := client1.SMembers(key)
+		members := client.SMembers(key)
 		strings, _ := members.Result()
 		log.Println("smember", len(strings), time.Since(t).Milliseconds())
 	}()
@@ -269,3 +288,25 @@ func AddData(val int) {
 	//分布式lock and get from db
 
 */
+
+func TestRedisShutdown() {
+	key := "TestRedisShutdown"
+	for {
+		statusCmd := client.Set(key, "1", time.Minute)
+		debug(statusCmd)
+		//time.Sleep(time.Second * 3)
+		time.Sleep(time.Millisecond)
+	}
+}
+func TestRedisSlaveDown() {
+
+	client.ClusterFailover()
+
+	//key := "TestRedisShutdown"
+	//for {
+	//	statusCmd := client.Set(key, "1", time.Minute)
+	//	debug(statusCmd)
+	//	//time.Sleep(time.Second * 3)
+	//	time.Sleep(time.Millisecond * 200)
+	//}
+}

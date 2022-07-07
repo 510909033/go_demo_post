@@ -6,7 +6,7 @@ import (
 )
 
 //http://ldaysjun.com/2019/01/14/Microservice/micro3/
-func GetLocalIP() (string, error) {
+func GetLocalIP() (ip string, err error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		log.Println(err)
